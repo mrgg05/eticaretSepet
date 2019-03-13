@@ -1,0 +1,74 @@
+﻿@model ECommerce.ViewModel.ShoppingCartViewModel
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<script type="text/javascript" src="~/Scripts/jquery-3.3.1.min.js"></script>
+<script type="text/javascript">
+    $(function () {
+        $(".RemoveLink").click(function () {
+            //linkteki id yi yakalamak için
+            var silinecekid = $(this).attr("data-id");
+            if (silinecekid != '') {
+                //null değilse post işlemi baslamalı
+                $.post("/ShoppingCart/RemoveToCart", { "id": silinecekid },
+                    function (data) {
+                        if (data.ItemCount == 0) {
+                            $("#item-count-" + data.Deletedid).fadeOut('slow');
+                        }
+                        else {
+                            $("#item-count-" + data.Deletedid).text(data.ItemCount);
+                        }
+                        $("#cart-total").text(data.CartTotal);
+                        $("#update-message").text(data.Message);
+                        $("#cart-status").text('Cart(' + data.CartTotal + ')');
+                    }
+                )
+            }
+            location.reload();
+        })
+    })
+</script>
+
+<h2>Index</h2>
+
+<div id="update-message"></div>
+<table class="table">
+    <tr>
+        <th>
+            Item Name
+        </th>
+        <th>Price (each)</th>
+        <th>Quantity</th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model.CartItems)
+    {
+        <tr id="row-@item.RecordId">
+            <td>
+                @Html.DisplayFor(modelItem => item.Product.Title)
+             
+            </td>
+            <td>@item.Product.Price</td>
+            <td id="item-count-@item.RecordId">
+
+                @item.Count
+            </td>
+            <td><input type="button" value="Remove"  href="#" class="RemoveLink btn btn-success" data-id="@item.RecordId" /></td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
+                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
+                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+            </td>
+        </tr>
+    }
+    <tr>
+        <td>Total</td>
+        <td></td>
+        <td></td>
+        <td id="cart-total">@Model.CartTotal</td>
+    </tr>
+
+</table>
